@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js"
+    crossorigin="anonymous"></script>
+</head>
+<style>
+  html,
+  body {
+    padding: 0;
+    margin: 0;
+    overflow-y: hidden;
+  }
+
+  .container {
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .photo_template {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    margin-left: -50vh;
+    width: auto;
+    height: 100%;
+  }
+
+  .take_photo_button {
+    position: absolute;
+    top: 50px;
+    right: 50%;
+    margin-left: -50px;
+    width: 100px;
+  }
+
+  .photo_preview_container {
+    position: absolute;
+    top: 50px;
+    right: 50px;
+    z-index: 10;
+  }
+
+  .photo_preview {
+    width: 600px;
+    height: 400px;
+    background-color: gray;
+  }
+
+  .photo_cancel {
+    position: relative;
+    top: 30px;
+    right: 0;
+  }
+
+  .photo_download {
+    position: relative;
+    top: 30px;
+    left: 0;
+  }
+
+  canvas {
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+  }
+
+  .countdown {
+    display: none;
+    font-size: 200px;
+    line-height: 200px;
+    color: white;
+    position: absolute;
+    top: 50%;
+    margin-top: -100px;
+    width: 100%;
+    text-align: center;
+    z-index: 200;
+  }
+</style>
+
+<body>
+  <div class="container">
+    <video class="input_video" style="display:none;"></video>
+    <img class="photo_template" src="./passport-template.jpg" />
+    <canvas class="output_canvas" width="1280px" height="720px"></canvas>
+    <div class="photo_preview_container">
+      <button class="photo_cancel">Retake</button>
+      <button class="photo_download">Download</button>
+      <img class="photo_preview" />
+    </div>
+    <button class="take_photo_button">Take Photo</button>
+    <div class="countdown"></div>
+  </div>
+  <script type="module">
+    // TODO: white background on downloaded photo
+    const videoElement = document.getElementsByClassName('input_video')[0];
+    const canvasElement = document.getElementsByClassName('output_canvas')[0];
+    const takePhotoButton = document.getElementsByClassName('take_photo_button')[0];
+    const photoPreview = document.getElementsByClassName('photo_preview')[0];
+    const countdownEl = document.getElementsByClassName('countdown')[0];
+    const canvasCtx = canvasElement.getContext('2d');
+
+    let videoWidth = null;
+    let videoHeight = null;
+    let innerHeight = null;
+    let innerWidth = null;
+
+    function resizeCanvas() {
+      if (videoWidth === null || videoHeight === null) {
+        if (videoElement.readyState) {
+          videoWidth = videoElement.videoWidth;
+          videoHeight = videoElement.videoHeight;
+          canvasElement.width = videoWidth;
+          canvasElement.height = videoHeight;
+
+          let innerWidth = window.innerWidth;
+          let innerHeight = window.innerHeight;
+          const ratio = videoWidth / videoHeight;
+          canvasElement.style.width = `${innerHeight * ratio}px`;
+          canvasElement.style.height = `${innerHeight}px`;
+        }
+      }
+    }
+
+    window.onresize = () => {
+      videoWidth = null;
+      videoHeight = null;
+      resizeCanvas();
+    }
+
+    takePhotoButton.addEventListener('click', function () {
+      let seconds = 3;
+      let interval = 0;
+
+      takePhotoButton.disabled = true;
+      countdownEl.style.display = 'block';
+      countdownEl.innerText = seconds;
+      const countdown = function () {
+        seconds -= 1;
+        countdownEl.innerText = seconds;
+        if (seconds === 0) {
+          // photoPreview.src = canvasElement.toDataURL();
+
+          var myImage;
+          var img = new Image();
+          img.src = canvasElement.toDataURL();
+          img.onload = () => {
+            canvasCtx.save(); // save canvas transform state before doing horizontal flip
+            const outputHeight = videoHeight * 2;
+            const outputWidth = videoHeight * 3
+            canvasElement.height = outputHeight;
+            canvasElement.width = outputWidth;
+            canvasCtx.clearRect(0, 0, outputWidth, outputHeight); // reset canvas
+            canvasCtx.rect(0, 0, outputWidth, outputHeight); // paint white background so it's not transparent
+            canvasCtx.fillStyle = 'white';
+            canvasCtx.fill();
+            canvasCtx.translate(outputWidth, 0);
+            canvasCtx.scale(-1, 1);
+            canvasCtx.drawImage(img, (videoWidth - videoHeight) / 2, 0, videoHeight, videoHeight, 0, 0, videoHeight, videoHeight);
+            canvasCtx.drawImage(img, (videoWidth - videoHeight) / 2, 0, videoHeight, videoHeight, videoHeight, 0, videoHeight, videoHeight);
+            canvasCtx.drawImage(img, (videoWidth - videoHeight) / 2, 0, videoHeight, videoHeight, videoHeight * 2, 0, videoHeight, videoHeight);
+            canvasCtx.drawImage(img, (videoWidth - videoHeight) / 2, 0, videoHeight, videoHeight, 0, videoHeight, videoHeight, videoHeight);
+            canvasCtx.drawImage(img, (videoWidth - videoHeight) / 2, 0, videoHeight, videoHeight, videoHeight, videoHeight, videoHeight, videoHeight);
+            canvasCtx.drawImage(img, (videoWidth - videoHeight) / 2, 0, videoHeight, videoHeight, videoHeight * 2, videoHeight, videoHeight, videoHeight);
+
+            //create a new data URL
+            photoPreview.src = canvasElement.toDataURL();
+            canvasElement.width = videoWidth;
+            canvasElement.height = videoHeight;
+            canvasCtx.restore();
+
+            // //add to existing containers
+            // var screenshotImg = $("<img></img>");
+            // screenshotImg.attr("src", myImage);
+            // screenshotImg.prependTo("#screenshot");
+          };
+          countdownEl.style.display = 'none';
+          window.clearInterval(interval);
+          takePhotoButton.disabled = false;
+        }
+      }
+
+      interval = window.setInterval(countdown, 1000);
+    });
+
+    function onResults(results) {
+      resizeCanvas();
+      canvasCtx.save();
+      canvasCtx.clearRect(0, 0, videoWidth, videoHeight);
+      canvasCtx.drawImage(results.segmentationMask, 0, 0,
+        videoWidth, videoHeight);
+
+      // Only overwrite existing pixels.
+      canvasCtx.globalCompositeOperation = 'source-in';
+      canvasCtx.drawImage(
+        results.image, 0, 0, videoWidth, videoHeight);
+
+      canvasCtx.restore();
+    }
+
+    const selfieSegmentation = new SelfieSegmentation({
+      locateFile: (file) => {
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`;
+      }
+    });
+    selfieSegmentation.setOptions({
+      selfieMode: true,
+      modelSelection: 0,
+    });
+    selfieSegmentation.onResults(onResults);
+
+    const camera = new Camera(videoElement, {
+      onFrame: async () => {
+        await selfieSegmentation.send({ image: videoElement });
+      },
+      width: 1280,
+      height: 720
+    });
+    camera.start();
+  </script>
+</body>
+
+</html>
