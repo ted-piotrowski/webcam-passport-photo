@@ -45,6 +45,7 @@
     top: 50px;
     right: 50px;
     z-index: 10;
+    display: none;
   }
 
   .photo_preview {
@@ -102,6 +103,7 @@
     const videoElement = document.getElementsByClassName('input_video')[0];
     const canvasElement = document.getElementsByClassName('output_canvas')[0];
     const takePhotoButton = document.getElementsByClassName('take_photo_button')[0];
+    const photoPreviewContainer = document.getElementsByClassName('photo_preview_container')[0];
     const photoPreview = document.getElementsByClassName('photo_preview')[0];
     const countdownEl = document.getElementsByClassName('countdown')[0];
     const canvasCtx = canvasElement.getContext('2d');
@@ -175,6 +177,7 @@
             canvasElement.height = videoHeight;
             canvasCtx.restore();
 
+            photoPreviewContainer.style.display = 'block';
             // //add to existing containers
             // var screenshotImg = $("<img></img>");
             // screenshotImg.attr("src", myImage);
