@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+	<div class="input_video">
+
+	</div>
+	<button class="flip">Flip</button>
+	<script>
+		const input_video = document.getElementsByClassName('input_video')[0];
+		const flip = document.getElementsByClassName('flip')[0];
+		const facingMode = ['user', 'environment'];
+		let camera, video;
+		let facingModeIndex = 0;
+
+		startCamera();
+
+		flip.addEventListener('click', () => {
+			stopCamera();
+			facingModeIndex = (facingModeIndex + 1) % facingMode.length;
+			startCamera();
+		});
+
+		function startCamera() {
+			const mode = facingMode[facingModeIndex];
+			video = document.createElement('video');
+			video.setAttribute('playsinline', 'true');
+			input_video.appendChild(video);
+			camera = new Camera(video, {
+				onFrame: async () => {
+					console.log('frame' + mode);
+					// await selfieSegmentation.send({ image: videoElement });
+				},
+				facingMode: mode,
+				width: 720,
+				height: 720
+			});
+			camera.start();
+		}
+
+		function stopCamera() {
+			camera && camera.stop();
+			video && video.remove();
+		}
+	</script>
+</body>
+
+</html>
