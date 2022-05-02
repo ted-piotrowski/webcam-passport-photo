@@ -13,6 +13,7 @@
   body {
     padding: 0;
     margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 
   .canvas_container {
@@ -112,7 +113,7 @@
     });
 
     retakeEl.addEventListener('click', () => {
-      camera && camera.start();
+      startCamera();
       previewElement.style.display = 'none';
       canvasElement.style.display = 'block';
       flipEl.style.display = 'block';
@@ -176,7 +177,7 @@
         previewElement.style.display = 'block';
         canvasElement.style.display = 'none';
         canvasContainer.style.backgroundImage = 'none';
-        camera && camera.stop();
+        stopCamera();
         downloadEl.addEventListener('click', () => download(dataURL));
       }
       img.src = canvasElement.toDataURL();
