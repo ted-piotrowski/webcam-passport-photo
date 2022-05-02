@@ -10,10 +10,11 @@
 	<div class="input_video">
 
 	</div>
-	<button class="flip">Flip</button>
+	<button class="flip">Flip</button><span class="meta_info"></span>
 	<script>
 		const input_video = document.getElementsByClassName('input_video')[0];
 		const flip = document.getElementsByClassName('flip')[0];
+		const meta_info = document.getElementsByClassName('meta_info')[0];
 		const facingMode = ['user', 'environment'];
 		let camera, video;
 		let facingModeIndex = 0;
@@ -33,7 +34,7 @@
 			input_video.appendChild(video);
 			camera = new Camera(video, {
 				onFrame: async () => {
-					console.log('frame' + mode);
+					meta_info.textContent = `${mode}, ${video.videoWidth}, ${video.videoHeight}`;
 					// await selfieSegmentation.send({ image: videoElement });
 				},
 				facingMode: mode,
