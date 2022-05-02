@@ -20,12 +20,15 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		background-repeat: no-repeat;
+		background-position: center;
+		background-size: 100%;
 	}
 </style>
 
 <body>
 	<div class="canvas_container">
-		<canvas class="output_canvas" style="background-color:red"></canvas>
+		<canvas class="output_canvas"></canvas>
 	</div>
 	<button class="flip">Flip</button><span class="meta_info"></span>
 	<script>
@@ -58,6 +61,7 @@
 
 			canvasContainer.style.width = `${smallestWindowDimension}px`;
 			canvasContainer.style.height = `${smallestWindowDimension}px`;
+			canvasContainer.style.backgroundImage = 'url(./passport-mask.png)';
 
 			canvasElement.height = smallestWindowDimension;
 			canvasElement.width = smallestWindowDimension * videoRatio;
