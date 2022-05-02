@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no" />
+	<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js"
+		crossorigin="anonymous"></script>
+</head>
+<style>
+	html,
+	body {
+		padding: 0;
+		margin: 0;
+	}
+
+	.canvas_container {
+		margin: 0 auto;
+		overflow: hidden;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-repeat: no-repeat;
+		background-position: center;
+		background-size: 100%;
+	}
+
+	.controls {
+		position: absolute;
+		bottom: 0;
+		width: 100%;
+		padding: 10px 0 10px;
+		background-color: rgba(0, 0, 0, 0.3);
+		display: flex;
+		justify-content: space-around;
+	}
+
+	.controls button {
+		width: 75px;
+		height: 75px;
+		border-radius: 50%;
+		border: 1px solid black;
+		box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.5);
+		overflow: hidden;
+		background-color: white;
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+
+	.mirror {
+		background-image: url(https://www.gstatic.com/images/icons/material/system_gm/2x/swap_horiz_black_24dp.png);
+	}
+
+	.capture {
+		background-image: url(https://www.gstatic.com/images/icons/material/system_gm/2x/photo_camera_black_24dp.png);
+	}
+
+	.flip {
+		background-image: url(https://www.gstatic.com/images/icons/material/system_gm/2x/flip_camera_ios_black_24dp.png);
+	}
+</style>
+
+<body>
+	<div class="canvas_container">
+		<canvas class="output_canvas"></canvas>
+	</div>
+	<div class="controls">
+		<button class="mirror" title="Mirror"></button>
+		<button class="capture"></button>
+		<button class="flip" title="Flip"></button>
+		<span class="meta_info" style="display:none;"></span>
+	</div>
+	<script>
+		const canvasContainer = document.getElementsByClassName('canvas_container')[0];
+		const canvasElement = document.getElementsByClassName('output_canvas')[0];
+		const flip = document.getElementsByClassName('flip')[0];
+		const meta_info = document.getElementsByClassName('meta_info')[0];
+		const canvasCtx = canvasElement.getContext('2d');
+		const facingMode = ['user', 'environment'];
+		let camera, video;
+		let facingModeIndex = 0;
+
+		let videoWidth, videoHeight, videoRatio;
+		let smallestWindowDimension = Math.min(window.innerWidth, window.innerHeight);
+
+		flip.addEventListener('click', () => {
+			stopCamera();
+			facingModeIndex = (facingModeIndex + 1) % facingMode.length;
+			startCamera();
+		});
+
+		window.onresize = () => {
+			smallestWindowDimension = Math.min(window.innerWidth, window.innerHeight);
+			resizeOutput();
+		}
+
+		function resizeOutput() {
+			canvasElement.style.height = `${smallestWindowDimension}px`;
+			canvasElement.style.width = `${smallestWindowDimension * videoRatio}px`;
+
+			canvasContainer.style.width = `${smallestWindowDimension}px`;
+			canvasContainer.style.height = `${smallestWindowDimension}px`;
+			canvasContainer.style.backgroundImage = 'url(./passport-mask.png)';
+
+			canvasElement.height = smallestWindowDimension;
+			canvasElement.width = smallestWindowDimension * videoRatio;
+		}
+
+		function onResults(results) {
+			canvasCtx.save();
+			canvasCtx.clearRect(0, 0, smallestWindowDimension * videoRatio, smallestWindowDimension);
+			canvasCtx.drawImage(results.segmentationMask, 0, 0,
+				smallestWindowDimension * videoRatio, smallestWindowDimension);
+
+			// Only overwrite existing pixels.
+			canvasCtx.globalCompositeOperation = 'source-in';
+			canvasCtx.drawImage(
+				results.image, 0, 0, smallestWindowDimension * videoRatio, smallestWindowDimension);
+
+			canvasCtx.restore();
+		}
+
+		const selfieSegmentation = new SelfieSegmentation({
+			locateFile: (file) => {
+				return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`;
+			}
+		});
+		selfieSegmentation.setOptions({
+			selfieMode: true,
+			modelSelection: 0,
+		});
+		selfieSegmentation.onResults(onResults);
+
+		function startCamera() {
+			const mode = facingMode[facingModeIndex];
+			video = document.createElement('video');
+			video.setAttribute('playsinline', 'true');
+			let firstFrame = true;
+			camera = new Camera(video, {
+				onFrame: async () => {
+					if (firstFrame) {
+						firstFrame = false;
+						videoWidth = video.videoWidth;
+						videoHeight = video.videoHeight;
+						videoRatio = videoWidth / videoHeight;
+						resizeOutput();
+						meta_info.textContent = `${mode}, ${video.videoWidth}, ${video.videoHeight}`;
+					}
+					await selfieSegmentation.send({ image: video });
+				},
+				facingMode: mode,
+				width: 720,
+				height: 720
+			});
+			camera.start();
+		}
+
+		function stopCamera() {
+			camera && camera.stop();
+			video && video.remove();
+		}
+
+		startCamera();
+	</script>
+</body>
+
+</html>
