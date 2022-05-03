@@ -1,6 +1,6 @@
 # webcam-passport-photo
 
-Take your own passport photo in the browser. No downloads. No installs.
+Take your own passport photo in the browser. No downloads. No installs. Uses [MediaPipe Selfie Segmentation]
 
 ![webcam passport photo screenshot](demo.jpg)
 
@@ -20,4 +20,5 @@ Laws are important, but they should not burden those ruled. The Post Office pass
 
 ## Resources 
 
-[Dept of State - Photo Composition Template](https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/photos/photo-composition-template.html)
+- [Dept of State - Photo Composition Template](https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/photos/photo-composition-template.html)
+- [MediaPipe Selfie Segmentation](https://google.github.io/mediapipe/solutions/selfie_segmentation.html)
