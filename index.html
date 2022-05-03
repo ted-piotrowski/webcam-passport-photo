@@ -2,288 +2,322 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no" />
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js"
-    crossorigin="anonymous"></script>
-  <meta name="keywords" content="passport, photo, webcam, service, free, browser" />
-  <meta name="description" content="Take your own passport photo in the browser" />
-  <meta property="og:title" content="Webcam Passport Photo" />
-  <meta property="og:description" content="Take your own passport photo in the browser" />
-  <meta property="og:image" content="https://webcam-passport-photo.onrender.com/demo.jpg" />
-  <title>Webcam Passport Photo</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no" />
+	<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js"
+		crossorigin="anonymous"></script>
+	<meta name="keywords" content="passport, photo, webcam, service, free, browser" />
+	<meta name="description" content="Take your own passport photo in the browser" />
+	<meta property="og:title" content="Webcam Passport Photo" />
+	<meta property="og:description" content="Take your own passport photo in the browser" />
+	<meta property="og:image" content="https://webcam-passport-photo.onrender.com/demo.jpg" />
+	<title>Webcam Passport Photo</title>
 </head>
 <style>
-  html,
-  body {
-    padding: 0;
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
+	html,
+	body {
+		padding: 0;
+		margin: 0;
+		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	}
 
-  .canvas_container {
-    margin: 0 auto;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 100%;
-  }
+	.canvas_container {
+		margin: 0 auto;
+		overflow: hidden;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-repeat: no-repeat;
+		background-position: center;
+		background-size: 100%;
+	}
 
-  .preview_image {
-    width: auto;
-    height: 75%;
-    box-shadow: 0px 1px 20px rgba(0, 0, 0, 0.3);
-  }
+	.preview_image {
+		width: auto;
+		height: 75%;
+		box-shadow: 0px 1px 20px rgba(0, 0, 0, 0.3);
+	}
 
-  .controls {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    padding: 10px 0 10px;
-    background-color: rgba(0, 0, 0, 0.3);
-    display: flex;
-    justify-content: space-around;
-  }
+	.controls {
+		position: absolute;
+		bottom: 0;
+		width: 100%;
+		padding: 10px 0 10px;
+		background-color: rgba(0, 0, 0, 0.3);
+		display: flex;
+		justify-content: space-around;
+	}
 
-  .controls button {
-    width: 75px;
-    height: 75px;
-    border-radius: 50%;
-    border: none;
-    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.3);
-    overflow: hidden;
-    background-color: white;
-    background-repeat: no-repeat;
-    background-position: center;
-  }
+	.controls button {
+		width: 75px;
+		height: 75px;
+		border-radius: 50%;
+		border: none;
+		box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.3);
+		overflow: hidden;
+		background-color: white;
+		background-repeat: no-repeat;
+		background-position: center;
+	}
 
-  .mirror {
-    background-image: url(https://www.gstatic.com/images/icons/material/system_gm/2x/swap_horiz_black_24dp.png);
-  }
+	.start {
+		background-image: url(https://www.gstatic.com/images/icons/material/system_gm/2x/check_black_24dp.png);
+	}
 
-  .capture {
-    background-image: url(https://www.gstatic.com/images/icons/material/system_gm/2x/photo_camera_black_24dp.png);
-  }
+	.mirror {
+		background-image: url(https://www.gstatic.com/images/icons/material/system_gm/2x/swap_horiz_black_24dp.png);
+	}
 
-  .flip {
-    background-image: url(https://www.gstatic.com/images/icons/material/system_gm/2x/flip_camera_ios_black_24dp.png);
-  }
+	.capture {
+		background-image: url(https://www.gstatic.com/images/icons/material/system_gm/2x/photo_camera_black_24dp.png);
+	}
 
-  .retake {
-    background-image: url(https://www.gstatic.com/images/icons/material/system_gm/2x/arrow_back_black_24dp.png);
-  }
+	.flip {
+		background-image: url(https://www.gstatic.com/images/icons/material/system_gm/2x/flip_camera_ios_black_24dp.png);
+	}
 
-  .download {
-    background-image: url(https://www.gstatic.com/images/icons/material/system_gm/2x/file_download_black_24dp.png);
-  }
+	.retake {
+		background-image: url(https://www.gstatic.com/images/icons/material/system_gm/2x/arrow_back_black_24dp.png);
+	}
+
+	.download {
+		background-image: url(https://www.gstatic.com/images/icons/material/system_gm/2x/file_download_black_24dp.png);
+	}
+
+	.step-capture,
+	.step-download {
+		display: none;
+	}
 </style>
 
 <body>
-  <div class="canvas_container">
-    <canvas class="output_canvas"></canvas>
-    <img class="preview_image" />
-  </div>
-  <div class="controls">
-    <button class="mirror" title="Mirror"></button>
-    <button class="capture" title="Capture"></button>
-    <button class="flip" title="Flip"></button>
-    <span class="meta_info" style="display:none;"></span>
-    <button class="retake" style="display:none;" title="Retake"></button>
-    <button class="download" style="display:none;" title="Download"></button>
-  </div>
-  <script>
-    const canvasContainer = document.getElementsByClassName('canvas_container')[0];
-    const canvasElement = document.getElementsByClassName('output_canvas')[0];
-    const previewElement = document.getElementsByClassName('preview_image')[0];
-    const mirrorEl = document.getElementsByClassName('mirror')[0];
-    const flipEl = document.getElementsByClassName('flip')[0];
-    const captureEl = document.getElementsByClassName('capture')[0];
-    const retakeEl = document.getElementsByClassName('retake')[0];
-    const downloadEl = document.getElementsByClassName('download')[0];
-    const meta_info = document.getElementsByClassName('meta_info')[0];
-    const canvasCtx = canvasElement.getContext('2d');
-    const facingMode = ['user', 'environment'];
-    let camera, video, mirrored = false;
-    let facingModeIndex = 0;
+	<div class="canvas_container">
+		<div class="step-intro" style="padding: 0 10px 0 10px">
+			<h1>Webcam Passport Photo</h1>
+			<img src="./passport-mask.png"
+				style="float:right;border:5px solid white;box-shadow:0px 0px 3px rgba(0,0,0,0.3);" width="100"
+				height="100" />
+			<p>Take your own passport photo in the browser.
+			<ul>
+				<li>No uploads</li>
+				<li>No downloads</li>
+				<li>No installs</li>
+				<li>No accounts</li>
+				<li>No tracking</li>
+			</ul>
+			</p>
+			<p>
+				This app respects your privacy. Webcam image is processed and saved locally.
+			</p>
+			<!-- <p style="border: 1px solid #ccc; background-color:#eee; padding:10px">
+				Let's begin. Click the checkmark below to activate your webcam.
+			</p> -->
+		</div>
+		<canvas class="output_canvas step-capture"></canvas>
+		<img class="preview_image step-download" />
+	</div>
+	<div class="controls">
+		<button class="start step-intro" title="Start"></button>
+		<button class="mirror step-capture" title="Mirror"></button>
+		<button class="capture step-capture" title="Capture"></button>
+		<button class="flip step-capture" title="Flip"></button>
+		<span class="meta_info step-download" style="visibility: hidden;"></span>
+		<button class="retake step-download" title="Retake"></button>
+		<button class="download step-download" title="Download"></button>
+	</div>
+	<script>
+		const canvasContainer = document.getElementsByClassName('canvas_container')[0];
+		const canvasElement = document.getElementsByClassName('output_canvas')[0];
+		const previewElement = document.getElementsByClassName('preview_image')[0];
+		const startEl = document.getElementsByClassName('start')[0];
+		const mirrorEl = document.getElementsByClassName('mirror')[0];
+		const flipEl = document.getElementsByClassName('flip')[0];
+		const captureEl = document.getElementsByClassName('capture')[0];
+		const retakeEl = document.getElementsByClassName('retake')[0];
+		const downloadEl = document.getElementsByClassName('download')[0];
+		const meta_info = document.getElementsByClassName('meta_info')[0];
+		const canvasCtx = canvasElement.getContext('2d');
+		const facingMode = ['user', 'environment'];
+		let camera, video, mirrored = false;
+		let facingModeIndex = 0;
+		let downloadFn;
+		let videoWidth, videoHeight, videoRatio;
+		let smallestWindowDimension = Math.min(window.innerWidth, window.innerHeight);
 
-    let videoWidth, videoHeight, videoRatio;
-    let smallestWindowDimension = Math.min(window.innerWidth, window.innerHeight);
+		function hide(el) { el.style.display = 'none'; }
+		function show(el) { el.style.display = 'block'; }
 
-    mirrorEl.addEventListener('click', () => {
-      if (mirrored) {
-        mirrored = false;
-        canvasElement.style.transform = 'none';
-      } else {
-        mirrored = true;
-        canvasElement.style.transform = 'scaleX(-1)';
-      }
-    });
+		startEl.addEventListener('click', () => {
+			start();
+		});
 
-    flipEl.addEventListener('click', () => {
-      stopCamera();
-      facingModeIndex = (facingModeIndex + 1) % facingMode.length;
-      startCamera();
-    });
+		mirrorEl.addEventListener('click', () => {
+			if (mirrored) {
+				mirrored = false;
+				canvasElement.style.transform = 'none';
+			} else {
+				mirrored = true;
+				canvasElement.style.transform = 'scaleX(-1)';
+			}
+		});
 
-    retakeEl.addEventListener('click', () => {
-      startCamera();
-      previewElement.style.display = 'none';
-      canvasElement.style.display = 'block';
-      mirrorEl.style.visibility = 'visible';
-      flipEl.style.display = 'block';
-      captureEl.style.display = 'block';
-      retakeEl.style.display = 'none';
-      downloadEl.style.display = 'none';
-      canvasContainer.style.backgroundImage = 'url(./passport-mask.png)';
-      downloadEl.removeEventListener('click');
-    });
+		flipEl.addEventListener('click', () => {
+			stopCamera();
+			facingModeIndex = (facingModeIndex + 1) % facingMode.length;
+			startCamera();
+		});
 
-    captureEl.addEventListener('click', function () {
-      let seconds = 3;
-      let interval = 0;
+		retakeEl.addEventListener('click', () => {
+			startCamera();
+			document.querySelectorAll('.step-download').forEach(hide);
+			document.querySelectorAll('.step-capture').forEach(show);
+			canvasContainer.style.backgroundImage = 'url(./passport-mask.png)';
+			downloadEl.removeEventListener('click', downloadFn);
+		});
 
-      captureEl.disabled = true;
-      const timer = document.createElement('div');
-      timer.style = `position:absolute;font-size:160px;color:white;top:${smallestWindowDimension / 2}px;margin-top:-80px;text-align:center;width:100%;`;
-      timer.textContent = seconds;
-      document.body.appendChild(timer);
+		captureEl.addEventListener('click', function () {
+			let seconds = 3;
+			let interval = 0;
 
-      const countdown = function () {
-        seconds -= 1;
-        timer.textContent = seconds;
-        if (seconds === 0) {
-          takePhoto();
-          window.clearInterval(interval);
-          timer.remove();
-          captureEl.disabled = false;
-        }
-      }
-      interval = window.setInterval(countdown, 1000);
-    });
+			captureEl.disabled = true;
+			const timer = document.createElement('div');
+			timer.style = `position:absolute;font-size:160px;color:white;top:${smallestWindowDimension / 2}px;margin-top:-80px;text-align:center;width:100%;`;
+			timer.textContent = seconds;
+			document.body.appendChild(timer);
 
-    window.onresize = () => {
-      smallestWindowDimension = Math.min(window.innerWidth, window.innerHeight);
-      resizeOutput();
-    }
+			const countdown = function () {
+				seconds -= 1;
+				timer.textContent = seconds;
+				if (seconds === 0) {
+					takePhoto();
+					window.clearInterval(interval);
+					timer.remove();
+					captureEl.disabled = false;
+				}
+			}
+			interval = window.setInterval(countdown, 1000);
+		});
 
-    function takePhoto() {
-      const outputSize = 600;
-      const img = new Image();
+		window.onresize = () => {
+			smallestWindowDimension = Math.min(window.innerWidth, window.innerHeight);
+			resizeOutput();
+		}
 
-      img.onload = function () {
-        const imageHeight = img.height;
-        const imageWidth = img.width;
-        canvasElement.height = outputSize;
-        canvasElement.width = outputSize;
-        canvasCtx.save(); // save canvas transform state before doing horizontal flip
-        canvasCtx.clearRect(0, 0, outputSize, outputSize); // reset canvas
-        canvasCtx.rect(0, 0, outputSize, outputSize); // paint white background so it's not transparent
-        canvasCtx.fillStyle = 'white';
-        canvasCtx.fill();
-        if (mirrored) {
-          canvasCtx.translate(outputSize, 0);
-          canvasCtx.scale(-1, 1);
-        }
-        canvasCtx.drawImage(img, (imageWidth - imageHeight) / 2, 0, imageHeight, imageHeight, 0, 0, outputSize, outputSize);
-        canvasCtx.restore();
-        const dataURL = canvasElement.toDataURL();
-        previewElement.src = dataURL;
-        resizeOutput();
-        retakeEl.style.display = 'block';
-        downloadEl.style.display = 'block';
-        mirrorEl.style.visibility = 'hidden';
-        flipEl.style.display = 'none';
-        captureEl.style.display = 'none';
-        previewElement.style.display = 'block';
-        canvasElement.style.display = 'none';
-        canvasContainer.style.backgroundImage = 'none';
-        stopCamera();
-        downloadEl.addEventListener('click', () => download(dataURL));
-      }
-      img.src = canvasElement.toDataURL();
-    }
+		function takePhoto() {
+			const outputSize = 600;
+			const img = new Image();
 
-    function download(url) {
-      const a = document.createElement('a')
-      a.href = url;
-      a.download = 'webcam-passport-photo';
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-    }
+			img.onload = function () {
+				const imageHeight = img.height;
+				const imageWidth = img.width;
+				canvasElement.height = outputSize;
+				canvasElement.width = outputSize;
+				canvasCtx.save(); // save canvas transform state before doing horizontal flip
+				canvasCtx.clearRect(0, 0, outputSize, outputSize); // reset canvas
+				canvasCtx.rect(0, 0, outputSize, outputSize); // paint white background so it's not transparent
+				canvasCtx.fillStyle = 'white';
+				canvasCtx.fill();
+				if (mirrored) {
+					canvasCtx.translate(outputSize, 0);
+					canvasCtx.scale(-1, 1);
+				}
+				canvasCtx.drawImage(img, (imageWidth - imageHeight) / 2, 0, imageHeight, imageHeight, 0, 0, outputSize, outputSize);
+				canvasCtx.restore();
+				const dataURL = canvasElement.toDataURL();
+				previewElement.src = dataURL;
+				resizeOutput();
+				document.querySelectorAll('.step-download').forEach(show);
+				document.querySelectorAll('.step-capture').forEach(hide);
+				canvasContainer.style.backgroundImage = 'none';
+				stopCamera();
+				downloadFn = function () { download(dataURL) };
+				downloadEl.addEventListener('click', downloadFn);
+			}
+			img.src = canvasElement.toDataURL();
+		}
 
-    function resizeOutput() {
-      canvasElement.style.height = `${smallestWindowDimension}px`;
-      canvasElement.style.width = `${smallestWindowDimension * videoRatio}px`;
+		function download(url) {
+			const a = document.createElement('a')
+			a.href = url;
+			a.download = 'webcam-passport-photo';
+			document.body.appendChild(a)
+			a.click()
+			document.body.removeChild(a)
+		}
 
-      canvasContainer.style.width = `${smallestWindowDimension}px`;
-      canvasContainer.style.height = `${smallestWindowDimension}px`;
+		function resizeOutput() {
+			canvasElement.style.height = `${smallestWindowDimension}px`;
+			canvasElement.style.width = `${smallestWindowDimension * videoRatio}px`;
 
-      canvasElement.height = videoHeight;
-      canvasElement.width = videoWidth;
-    }
+			canvasContainer.style.width = `${smallestWindowDimension}px`;
+			canvasContainer.style.height = `${smallestWindowDimension}px`;
 
-    function onResults(results) {
-      canvasCtx.save();
-      canvasCtx.clearRect(0, 0, videoWidth, videoHeight);
-      canvasCtx.drawImage(results.segmentationMask, 0, 0,
-        videoWidth, videoHeight);
+			canvasElement.height = videoHeight;
+			canvasElement.width = videoWidth;
+		}
 
-      // Only overwrite existing pixels.
-      canvasCtx.globalCompositeOperation = 'source-in';
-      canvasCtx.drawImage(
-        results.image, 0, 0, videoWidth, videoHeight);
+		function onResults(results) {
+			canvasCtx.save();
+			canvasCtx.clearRect(0, 0, videoWidth, videoHeight);
+			canvasCtx.drawImage(results.segmentationMask, 0, 0,
+				videoWidth, videoHeight);
 
-      canvasCtx.restore();
-    }
+			// Only overwrite existing pixels.
+			canvasCtx.globalCompositeOperation = 'source-in';
+			canvasCtx.drawImage(
+				results.image, 0, 0, videoWidth, videoHeight);
 
-    const selfieSegmentation = new SelfieSegmentation({
-      locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`;
-      }
-    });
-    selfieSegmentation.setOptions({
-      selfieMode: true,
-      modelSelection: 0,
-    });
-    selfieSegmentation.onResults(onResults);
+			canvasCtx.restore();
+		}
 
-    function startCamera() {
-      const mode = facingMode[facingModeIndex];
-      video = document.createElement('video');
-      video.setAttribute('playsinline', 'true');
-      let firstFrame = true;
-      camera = new Camera(video, {
-        onFrame: async () => {
-          if (firstFrame) {
-            firstFrame = false;
-            videoWidth = video.videoWidth;
-            videoHeight = video.videoHeight;
-            videoRatio = videoWidth / videoHeight;
-            canvasContainer.style.backgroundImage = 'url(./passport-mask.png)';
-            resizeOutput();
-            meta_info.textContent = `${mode}, ${video.videoWidth}, ${video.videoHeight}`;
-          }
-          await selfieSegmentation.send({ image: video });
-        },
-        facingMode: mode,
-        width: 720,
-        height: 720
-      });
-      camera.start();
-    }
+		const selfieSegmentation = new SelfieSegmentation({
+			locateFile: (file) => {
+				return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`;
+			}
+		});
+		selfieSegmentation.setOptions({
+			selfieMode: true,
+			modelSelection: 0,
+		});
+		selfieSegmentation.onResults(onResults);
 
-    function stopCamera() {
-      camera && camera.stop();
-      video && video.remove();
-    }
+		function startCamera() {
+			const mode = facingMode[facingModeIndex];
+			video = document.createElement('video');
+			video.setAttribute('playsinline', 'true');
+			let firstFrame = true;
+			camera = new Camera(video, {
+				onFrame: async () => {
+					if (firstFrame) {
+						firstFrame = false;
+						videoWidth = video.videoWidth;
+						videoHeight = video.videoHeight;
+						videoRatio = videoWidth / videoHeight;
+						canvasContainer.style.backgroundImage = 'url(./passport-mask.png)';
+						resizeOutput();
+						meta_info.textContent = `${mode}, ${video.videoWidth}, ${video.videoHeight}`;
+					}
+					await selfieSegmentation.send({ image: video });
+				},
+				facingMode: mode,
+				width: 720,
+				height: 720
+			});
+			camera.start();
+		}
 
-    startCamera();
-  </script>
+		function stopCamera() {
+			camera && camera.stop();
+			video && video.remove();
+		}
+
+		function start() {
+			startCamera();
+			document.querySelectorAll('.step-capture').forEach(show);
+			document.querySelectorAll('.step-intro').forEach(hide);
+		}
+	</script>
 </body>
 
 </html>
