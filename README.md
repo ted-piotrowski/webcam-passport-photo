@@ -1,27 +1,17 @@
 # webcam-passport-photo
-Take your own passport photo using your webcam
 
-## Goals
+Take your own passport photo in the browser. No downloads. No installs.
 
-### MVP
+[Demo](https://webcam-passport-photo.onrender.com)
 
-- [ ] Working example code https://google.github.io/mediapipe/solutions/selfie_segmentation.html
-- [ ] Add passport template virtual background
-- [ ] Download
-- [ ] Deploy on render.com
-- [ ] Manual photo cropping and resizing with Photopea
+## How to
 
-### V1
+1. Stand next to a solid background like a wall
+2. Place laptop or hold phone at eye-level
+3. Don't forget to look up at the camera
+4. Photos produced are `600x600` pixels or `2"` printed at `300dpi`
+5. Develop at CVS, Wallgreens or RiteAid on `4x6"`
 
-- [ ] Time countdown before taking photo
-- [ ] Photo preview with Download or Retake option
+## Philosophy
 
-### V2
-
-- [ ] Automatic photo cropping
-- [ ] Automatic photo resizing
-
-### V3
-
-- [ ] UX for granting webcam access
-- [ ] Send to Fedex/Walgreens/Walmart/RiteAid for pickup
+Laws are important, but they should not burden those ruled. The Post Office passport photo service costs $15. Here a free alternative you can use yourself. Fork as you like.

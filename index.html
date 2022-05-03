@@ -165,23 +165,24 @@
     }
 
     function takePhoto() {
+      const outputSize = 600;
       const img = new Image();
 
       img.onload = function () {
         const imageHeight = img.height;
         const imageWidth = img.width;
-        canvasElement.height = imageHeight;
-        canvasElement.width = imageHeight;
+        canvasElement.height = outputSize;
+        canvasElement.width = outputSize;
         canvasCtx.save(); // save canvas transform state before doing horizontal flip
-        canvasCtx.clearRect(0, 0, imageHeight, imageHeight); // reset canvas
-        canvasCtx.rect(0, 0, imageHeight, imageHeight); // paint white background so it's not transparent
+        canvasCtx.clearRect(0, 0, outputSize, outputSize); // reset canvas
+        canvasCtx.rect(0, 0, outputSize, outputSize); // paint white background so it's not transparent
         canvasCtx.fillStyle = 'white';
         canvasCtx.fill();
         if (mirrored) {
-          canvasCtx.translate(imageHeight, 0);
+          canvasCtx.translate(outputSize, 0);
           canvasCtx.scale(-1, 1);
         }
-        canvasCtx.drawImage(img, (imageWidth - imageHeight) / 2, 0, imageHeight, imageHeight, 0, 0, imageHeight, imageHeight);
+        canvasCtx.drawImage(img, (imageWidth - imageHeight) / 2, 0, imageHeight, imageHeight, 0, 0, outputSize, outputSize);
         canvasCtx.restore();
         const dataURL = canvasElement.toDataURL();
         previewElement.src = dataURL;
