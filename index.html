@@ -82,7 +82,7 @@
     <img class="preview_image" />
   </div>
   <div class="controls">
-    <button class="mirror" title="Mirror" style="visibility:hidden"></button>
+    <button class="mirror" title="Mirror"></button>
     <button class="capture" title="Capture"></button>
     <button class="flip" title="Flip"></button>
     <span class="meta_info" style="display:none;"></span>
@@ -93,6 +93,7 @@
     const canvasContainer = document.getElementsByClassName('canvas_container')[0];
     const canvasElement = document.getElementsByClassName('output_canvas')[0];
     const previewElement = document.getElementsByClassName('preview_image')[0];
+    const mirrorEl = document.getElementsByClassName('mirror')[0];
     const flipEl = document.getElementsByClassName('flip')[0];
     const captureEl = document.getElementsByClassName('capture')[0];
     const retakeEl = document.getElementsByClassName('retake')[0];
@@ -100,11 +101,21 @@
     const meta_info = document.getElementsByClassName('meta_info')[0];
     const canvasCtx = canvasElement.getContext('2d');
     const facingMode = ['user', 'environment'];
-    let camera, video;
+    let camera, video, mirrored = false;
     let facingModeIndex = 0;
 
     let videoWidth, videoHeight, videoRatio;
     let smallestWindowDimension = Math.min(window.innerWidth, window.innerHeight);
+
+    mirrorEl.addEventListener('click', () => {
+      if (mirrored) {
+        mirrored = false;
+        canvasElement.style.transform = 'none';
+      } else {
+        mirrored = true;
+        canvasElement.style.transform = 'scaleX(-1)';
+      }
+    });
 
     flipEl.addEventListener('click', () => {
       stopCamera();
@@ -116,6 +127,7 @@
       startCamera();
       previewElement.style.display = 'none';
       canvasElement.style.display = 'block';
+      mirrorEl.style.visibility = 'visible';
       flipEl.style.display = 'block';
       captureEl.style.display = 'block';
       retakeEl.style.display = 'none';
@@ -165,6 +177,10 @@
         canvasCtx.rect(0, 0, imageHeight, imageHeight); // paint white background so it's not transparent
         canvasCtx.fillStyle = 'white';
         canvasCtx.fill();
+        if (mirrored) {
+          canvasCtx.translate(imageHeight, 0);
+          canvasCtx.scale(-1, 1);
+        }
         canvasCtx.drawImage(img, (imageWidth - imageHeight) / 2, 0, imageHeight, imageHeight, 0, 0, imageHeight, imageHeight);
         canvasCtx.restore();
         const dataURL = canvasElement.toDataURL();
@@ -172,6 +188,7 @@
         resizeOutput();
         retakeEl.style.display = 'block';
         downloadEl.style.display = 'block';
+        mirrorEl.style.visibility = 'hidden';
         flipEl.style.display = 'none';
         captureEl.style.display = 'none';
         previewElement.style.display = 'block';
