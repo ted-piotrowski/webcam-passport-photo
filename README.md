@@ -12,7 +12,7 @@ Take your own passport photo in the browser. No downloads. No installs.
 2. Place laptop or hold phone at eye-level
 3. Don't forget to look up at the camera
 4. Photos produced are `600x600` pixels or `2"` printed at `300dpi`
-5. Develop at CVS, Wallgreens or RiteAid on `4x6"`
+5. Print at home or CVS, Wallgreens, RiteAid for less than $0.50
 
 [Photo Composition Template](https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/photos/photo-composition-template.html)
 
