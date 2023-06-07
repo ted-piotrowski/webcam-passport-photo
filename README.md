@@ -2,7 +2,7 @@
 
 Take your own passport photo in the browser. No downloads. No installs.
 
-[Live Demo](https://webcampassportphoto.com)
+[Live Demo](https://webcam-passport-photo.onrender.com)
 
 ![webcam passport photo screenshot](demo.jpg)
 
